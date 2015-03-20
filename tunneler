@@ -1,0 +1,110 @@
+#!/user/bin/env python2
+
+import pexpect
+import sys
+import argparse
+import yaml
+
+
+file = open("tunneler.cfg", 'r')
+config = yaml.load(file)
+file.close()
+
+
+
+
+###Take arguments from CLI###
+parser = argparse.ArgumentParser(description="test")
+parser.add_argument('-ia', '--insideaddress', help='Inside address', required=True)
+parser.add_argument('-ip', '--insideport', help='Inside Port', required=True)
+parser.add_argument('-op', '--outsideport', help='Outside Port', required=True)
+parser.add_argument('-oa', '--outsideaddress', help='Outside Address', required=False)
+parser.add_argument('-n', '--host', help='Host IP', required=False)
+parser.add_argument('-l', '--user', help='username', required=False)
+parser.add_argument('-p', '--password', help='password', required=False)
+
+args = parser.parse_args()
+
+outsideaddress = ""
+if args.outsideaddress == None:
+    if config['host'] != None:
+        outsideaddress = config["host"]
+user = ""
+if args.user == None:
+    if config['user'] != None:
+        user = config['user']
+
+password = ""
+if args.password == None:
+    if config['pass'] != None:
+        password = config['pass']
+
+host = ""
+if args.host == None:
+    if config['host'] != None:
+        host = config['host']
+
+
+
+
+#print("Inside Address: %s" % args.insideaddress)
+#print("Inside Port: %s" % args.insideport)
+#print("Outside Port: %s" % args.outsideport)
+
+
+
+##Command Structure:
+
+oldnatcommand = config['nat']
+newnatcommand = 'ip nat inside source static tcp ' + args.insideaddress + ' ' + args.insideport + ' ' + outsideaddress + ' ' + args.outsideport + ' extendable'
+
+session = pexpect.spawn('telnet ' + host)
+session.logfile_read = sys.stdout
+
+session.expect('.*Username: ')
+
+session.sendline(user)
+session.expect('Password: ')
+session.sendline(password)
+session.expect('.*>')
+
+session.sendline('enable')
+session.expect('Password: ')
+
+
+session.sendline(password)
+session.expect('.*#')
+session.sendline('conf t')
+
+session.expect('.*#')
+session.sendline('no ' + oldnatcommand)
+
+session.expect('.*#')
+session.sendline(newnatcommand)
+
+session.expect('.*#')
+
+
+
+# host : 10.94.238.83
+# user : admin
+# pass : cisco
+# insideaddress :
+# insideport :
+# outsideport :
+# outsideaddress :
+# nat : ip nat inside source static tcp 192.168.201.222 22 10.94.238.83 8022 extendable
+new_config = {}
+new_config['host'] = host
+new_config['user'] = user
+new_config['pass'] = password
+new_config['insideaddress'] = args.insideaddress
+new_config['insideport'] = args.insideport
+new_config['outsideport'] = args.outsideport
+new_config['outsideaddress'] = outsideaddress
+new_config['nat'] = newnatcommand
+
+###write new config file
+file = open('tunneler.cfg', 'w')
+file.write(yaml.dump(new_config, default_flow_style=False))
+file.close()
