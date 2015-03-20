@@ -1,5 +1,14 @@
 #!/user/bin/env python2
 
+###this is a simple script i created for my own lab to open a port on my router and forward it
+###to something in my lab behind NAT.  Currently very basic, but pretty useful.  Just edit
+###tunneler.cfg the first time, OR make sure you use the -n -l -p arguements the first time to prime
+###the config
+
+###I left the logging on.  You can disable this by removing session.logfile_read = sys.stdout
+
+
+
 import pexpect
 import sys
 import argparse
@@ -9,6 +18,7 @@ import yaml
 file = open("tunneler.cfg", 'r')
 config = yaml.load(file)
 file.close()
+
 
 
 
