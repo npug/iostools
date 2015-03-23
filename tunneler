@@ -96,14 +96,7 @@ session.expect('.*#')
 
 
 
-# host : 10.94.238.83
-# user : admin
-# pass : cisco
-# insideaddress :
-# insideport :
-# outsideport :
-# outsideaddress :
-# nat : ip nat inside source static tcp 192.168.201.222 22 10.94.238.83 8022 extendable
+
 new_config = {}
 new_config['host'] = host
 new_config['user'] = user
