@@ -2,7 +2,7 @@
 
 ###this is a simple script i created for my own lab to open a port on my router and forward it
 ###to something in my lab behind NAT.  Currently very basic, but pretty useful.  Just edit
-###tunneler.cfg the first time, OR make sure you use the -n -l -p arguements the first time to prime
+###expose.cfg the first time, OR make sure you use the -n -l -p arguements the first time to prime
 ###the config
 
 ###I left the logging on.  You can disable this by removing session.logfile_read = sys.stdout
@@ -15,7 +15,7 @@ import argparse
 import yaml
 
 
-file = open("tunneler.cfg", 'r')
+file = open("expose.cfg", 'r')
 config = yaml.load(file)
 file.close()
 
@@ -37,8 +37,11 @@ args = parser.parse_args()
 
 outsideaddress = ""
 if args.outsideaddress == None:
-    if config['host'] != None:
+    if args.host != None:
+        outsideaddress = args.host
+    elif config['host'] != None:
         outsideaddress = config["host"]
+
 user = ""
 if args.user == None:
     if config['user'] != None:
@@ -57,17 +60,14 @@ if args.host == None:
 
 
 
-#print("Inside Address: %s" % args.insideaddress)
-#print("Inside Port: %s" % args.insideport)
-#print("Outside Port: %s" % args.outsideport)
 
 
-
-##Command Structure:
-
+##Build IOS Commands to add
 oldnatcommand = config['nat']
 newnatcommand = 'ip nat inside source static tcp ' + args.insideaddress + ' ' + args.insideport + ' ' + outsideaddress + ' ' + args.outsideport + ' extendable'
 
+
+##Start using PEXPECT to interact with the router
 session = pexpect.spawn('telnet ' + host)
 session.logfile_read = sys.stdout
 
@@ -96,7 +96,7 @@ session.expect('.*#')
 
 
 
-
+###Write new config to file, for easy command removal, and if you use the same router multiple times, less args to input
 new_config = {}
 new_config['host'] = host
 new_config['user'] = user
@@ -108,6 +108,6 @@ new_config['outsideaddress'] = outsideaddress
 new_config['nat'] = newnatcommand
 
 ###write new config file
-file = open('tunneler.cfg', 'w')
+file = open('expose.cfg', 'w')
 file.write(yaml.dump(new_config, default_flow_style=False))
 file.close()
