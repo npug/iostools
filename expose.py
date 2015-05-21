@@ -15,6 +15,7 @@ import argparse
 import yaml
 
 
+#Open and read config file
 file = open("expose.cfg", 'r')
 config = yaml.load(file)
 file.close()
@@ -41,29 +42,40 @@ if args.outsideaddress == None:
         outsideaddress = args.host
     elif config['host'] != None:
         outsideaddress = config["host"]
+else:
+    outsideaddress = args.outsideaddress
 
 user = ""
 if args.user == None:
     if config['user'] != None:
         user = config['user']
+else:
+    user = args.user
 
 password = ""
 if args.password == None:
     if config['pass'] != None:
         password = config['pass']
+else:
+    password = args.password
 
 host = ""
 if args.host == None:
     if config['host'] != None:
         host = config['host']
-
+else:
+    host = args.host
 
 
 
 
 
 ##Build IOS Commands to add
-oldnatcommand = config['nat']
+if config['nat'] == None:
+    oldnatcommand = ""
+else:
+    oldnatcommand = config['nat']
+
 newnatcommand = 'ip nat inside source static tcp ' + args.insideaddress + ' ' + args.insideport + ' ' + outsideaddress + ' ' + args.outsideport + ' extendable'
 
 
@@ -71,18 +83,18 @@ newnatcommand = 'ip nat inside source static tcp ' + args.insideaddress + ' ' + 
 session = pexpect.spawn('telnet ' + host)
 session.logfile_read = sys.stdout
 
-session.expect('.*Username: ')
+#session.expect('.*Username: ')
 
-session.sendline(user)
+#session.sendline(user)
 session.expect('Password: ')
 session.sendline(password)
+
 session.expect('.*>')
-
 session.sendline('enable')
+
 session.expect('Password: ')
-
-
 session.sendline(password)
+
 session.expect('.*#')
 session.sendline('conf t')
 
