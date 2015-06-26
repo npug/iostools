@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description="test")
 parser.add_argument('-ip', '--ipaddress', help='IP Address', required=True)
 parser.add_argument('-u', '--user', help='username', required=True)
 parser.add_argument('-p', '--password', help='password', required=True)
-parser.add_argument('-l', '--line', help='password', required=True)
+parser.add_argument('-l', '--line', help='line number', required=True)
 
 args = parser.parse_args()
 

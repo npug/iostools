@@ -5,3 +5,6 @@ expose: Does a quick static PAT translation.  Retains the last entry and will au
 You can prime expose by filling out the expose.cfg file before you run it...then you only need to supply the insideaddress, insideport, and outsideport arguments
 
 Video Overview: http://quick.as/YdRgsz3dm
+
+
+clearline: Clears a given line in a router
